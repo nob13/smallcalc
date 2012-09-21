@@ -4,10 +4,10 @@ A small math calculation library. Compiles on Linux and iOS.
 
 Can calculate with Fractions and provides some nice function printing, e.g:
 
-> 2+3/sin(0.5*PI)
-         3           
-2 + ──────────── => 5
-    sin(0.5 * π)
+    > 2+3/sin(0.5*PI)
+             3           
+    2 + ──────────── => 5
+        sin(0.5 * π)
 
 
 The library is used for µoscalc on iPad (http://itunes.apple.com/us/app/oscalc/id555689840)
