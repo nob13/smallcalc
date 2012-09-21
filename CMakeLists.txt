@@ -1,0 +1,54 @@
+cmake_minimum_required (VERSION 2.6)
+project (libsmallcalc)
+enable_testing ()
+# set (CMAKE_VERBOSE_MAKEFILE ON)
+
+if (NOT CMAKE_BUILD_TYPE)
+	set (CMAKE_BUILD_TYPE "DEBUG")
+endif()
+
+if (WIN32)
+	add_definitions("-DWIN32")
+	add_definitions("-D_CRT_SECURE_NO_WARNINGS") # otherwise windows doesn't like fopen etc.
+endif()
+
+if (NOT DEFINED WIN32)
+	# Warnings
+	set(CMAKE_CXX_FLAGS "-Wall")
+endif()
+
+if (DEFINED BOOST_ROOT)
+	# find_package doesn't work on my mac building iOS builds
+	message(STATUS "BOOST_ROOT defined, taking it")
+	include_directories (${BOOST_ROOT}/include)
+else()
+	find_package (Boost 1.40.0 REQUIRED)
+	include_directories (${Boost_INCLUDE_DIRS})
+	message (STATUS "Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
+endif()
+
+message (STATUS "CXX Flags:      ${CMAKE_CXX_FLAGS}")
+message (STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}") 
+
+set (LIBS "")
+
+# libsmallcalc library
+add_subdirectory (libsmallcalc)
+set (LIBS ${LIBS} "smallcalc")
+include_directories ("libsmallcalc")
+
+# Executeable
+add_subdirectory (testapp)
+
+# Testcases
+find_package (GTest)
+if (GTEST_FOUND)
+	if (NOT WIN32)
+		# gtest on fedora is broken
+		set (GTEST_LIBRARIES ${GTEST_LIBRARIES} pthread)
+	endif()
+	add_subdirectory ("testcases")
+else()
+	message (STATUS "GTest not found, no testcases")
+endif()
+
