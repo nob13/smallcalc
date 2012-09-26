@@ -407,6 +407,49 @@ private:
 
 };
 
+/** Paints the higher element above and after the lower element. */
+class HighBox : public Box {
+public:
+	HighBox (const BoxPtr & lower, const BoxPtr & higher) : mLower (lower), mHigher (higher) {}
+
+	// Implementation of Box
+	virtual int childCount () const { return 2; }
+	virtual BoxPtr child (int i) const {
+		if (i == 0) return mLower;
+		if (i == 1) return mHigher;
+		return BoxPtr();
+	}
+
+	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
+		Dimension2i lowerSpace = mLower->minSize(engine);
+		Dimension2i upperSpace = mHigher->minSize(engine);
+		return Dimension2i (lowerSpace.width + upperSpace.width, lowerSpace.height + upperSpace.height);
+	}
+
+
+	virtual void layoutChildren (const DrawEngine & engine) {
+		Dimension2i lowerSpace = mLower->minSize(engine);
+		Dimension2i upperSpace = mHigher->minSize(engine);
+		mLower->setPosition (Point2i (0, upperSpace.height));
+		mLower->setSize(lowerSpace);
+		mHigher->setPosition(Point2i (lowerSpace.width, 0));
+		mHigher->setSize (upperSpace);
+	}
+
+private:
+	BoxPtr mLower;
+	BoxPtr mHigher;
+};
+
+/** Paints an expontent function. */
+class PowerBox : public HighBox {
+public:
+	PowerBox (const BoxPtr & base, const BoxPtr & exponent) :
+		HighBox (BoxPtr(new HorizontalSpaceProviderBox(base)),
+				BoxPtr(new HorizontalSpaceProviderBox(exponent))){
+	}
+};
+
 
 
 

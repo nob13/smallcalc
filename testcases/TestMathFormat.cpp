@@ -104,6 +104,9 @@ TEST (TestMathFormat2, autoConersion) {
 	printAsBox (PrimitiveValue (Fraction64 (2,3)));
 	printAsBox (PrimitiveValue (Fraction64 (-2,3)));
 	printAsBox (PrimitiveValue (Fraction64 (-1204,23458)));
+	printAsBox (sc.parse ("(1/4)^2"));
+	printAsBox (sc.parse ("4^2"));
+	printAsBox (sc.parse ("12 + x^2 + x^3 + 4 * x ^ (1/2)"));
 
 }
 
