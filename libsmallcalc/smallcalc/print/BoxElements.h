@@ -26,13 +26,13 @@ public:
 	}
 
 	const Point2i & position () const { return mPosition; }
-	const Dimension2i & size() const { return mSize; }
+	const Surrounding2i & size() const { return mSize; }
 
 	/// Set Position of a Box
 	void setPosition (const Point2i & pos) { mPosition = pos; }
 
 	/// Set size of a box.
-	void setSize (const Dimension2i & size) { mSize = size; }
+	void setSize (const Surrounding2i & size) { mSize = size; }
 
 	/// Set parent
 	void setParent (Box* box) { mParent = box; }
@@ -52,7 +52,7 @@ public:
 	/// The flags a box has
 	virtual int flags () const { return 0; }
 
-	const Dimension2i & minSize (const DrawEngine & engine) const {
+	const Surrounding2i & minSize (const DrawEngine & engine) const {
 		if (mMinSizeDirty) {
 			mMinSize = calcMinSpace(engine);
 			mMinSizeDirty = false;
@@ -62,16 +62,16 @@ public:
 
 protected:
 	/// Returns minimal space the box will use
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const = 0;
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const = 0;
 
 	/// Minimum size got dirty
 	void minSizeGotDirty () { mMinSizeDirty = true; }
 
 	Point2i mPosition; ///< Position in term of parent element
-	Dimension2i mSize; ///< Occupied size
+	Surrounding2i mSize; ///< Occupied size
 	Box* mParent;
 private:
-	mutable Dimension2i mMinSize;
+	mutable Surrounding2i mMinSize;
 	mutable bool mMinSizeDirty;
 };
 
@@ -86,7 +86,7 @@ public:
 	}
 
 	/// Returns minimal space the box will use
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const { return mChild->minSize(engine); }
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const { return mChild->minSize(engine); }
 
 	virtual void layoutChildren (const DrawEngine & engine) {
 		mChild->setPosition (Point2i (0,0));
@@ -113,7 +113,7 @@ protected:
 /** A Box which has a fixed size, working as the root of all. */
 class RootBox : public SingleHolder {
 public:
-	RootBox (const Dimension2i & size, const BoxPtr & child) : SingleHolder (child) {
+	RootBox (const Surrounding2i & size, const BoxPtr & child) : SingleHolder (child) {
 		mSize = size;
 	}
 };
@@ -121,7 +121,7 @@ public:
 class TextBox : public Box {
 public:
 	TextBox (const std::string & text) : mText (text) {}
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const { return engine.textSize (mText); }
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const { return engine.textSize (mText); }
 	virtual void draw (DrawEngine & engine) const {
 		engine.drawText(mText);
 	}
@@ -132,11 +132,11 @@ private:
 /** A Box holding a horizontal line. */
 class LineBox : public Box {
 public:
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
-		return Dimension2i(0,1);
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		return Surrounding2i (0,0,1,0);
 	}
 	virtual void draw (DrawEngine & engine) const {
-		engine.drawLine(mSize.width);
+		return engine.drawLine (mSize.right);
 	}
 };
 
@@ -147,15 +147,16 @@ public:
 
 	}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
 		return mChild->minSize(engine);
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		int childWidth = mChild->minSize(engine).width;
-		int i  = (mSize.width - childWidth) / 2;
+		Surrounding2i childSize = mChild->minSize(engine);
+		int childWidth = childSize.width();
+		int i  = (mSize.width() - childWidth) / 2;
 		mChild->setPosition (Point2i (i, 0));
-		mChild->setSize (Dimension2i (childWidth, mSize.height));
+		mChild->setSize (Surrounding2i (childSize.left, mSize.top, childSize.right, mSize.bottom));
 	}
 };
 
@@ -166,23 +167,24 @@ public:
 
 	}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
 		return mChild->minSize(engine);
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		int childHeight = mChild->minSize (engine).height;
-		int i = (mSize.height - childHeight) / 2;
+		Surrounding2i childSize = mChild->minSize (engine);
+		int childHeight = childSize.height();
+		int i = (mSize.height() - childHeight) / 2;
 		mChild->setPosition (Point2i (0, i));
-		mChild->setSize (Dimension2i (mSize.width, childHeight));
+		mChild->setSize (Surrounding2i (mSize.left, childSize.top, mSize.right, childSize.bottom));
 	}
 };
 
 /** Provides some horizontal extra space. */
 class HSpace : public Box {
 public:
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
-		return Dimension2i (engine.horizontalExtraSpace(), 0);
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		return Surrounding2i (0,0,engine.horizontalExtraSpace(), 0);
 	}
 };
 
@@ -190,7 +192,7 @@ class Paranthesis : public Box {
 public:
 	Paranthesis (DrawEngine::ParanthesisType t) : mType (t) {}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
 		return engine.paranthesisMinSize(mType);
 	}
 
@@ -208,16 +210,16 @@ public:
 	ParanthesisSpaceProvider (const BoxPtr & child) : SingleHolder (child) {
 	}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
-		Dimension2i childSpace = mChild->minSize(engine);
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		Surrounding2i childSpace = mChild->minSize(engine);
 		Surrounding2i s = engine.paranthesisExtraSpace(childSpace);
-		return Dimension2i (s.left + s.right + childSpace.width, s.top + s.bottom + childSpace.height);
+		return Surrounding2i::append (childSpace, s);
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
 		Surrounding2i s = engine.paranthesisExtraSpace(mSize);
 		mChild->setPosition (Point2i (s.left, s.top));
-		mChild->setSize (Dimension2i (mSize.width - s.left - s.right, mSize.height - s.top - s.bottom));
+		mChild->setSize (Surrounding2i::remove (mSize, s));
 	}
 
 };
@@ -228,10 +230,11 @@ public:
 
 	}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
-		Dimension2i childSpace = mChild->minSize (engine);
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		Surrounding2i childSpace = mChild->minSize (engine);
 		if (mChild->flags() & F_NeedsClosedHSpace) {
-			childSpace.width += 2 * engine.horizontalExtraSpace();
+			childSpace.left  += engine.horizontalExtraSpace();
+			childSpace.right += engine.horizontalExtraSpace();
 		}
 		return childSpace;
 	}
@@ -244,7 +247,7 @@ public:
 		if (mChild->flags() & F_NeedsClosedHSpace) {
 			int extra = engine.horizontalExtraSpace();
 			mChild->setPosition (Point2i (extra, 0));
-			mChild->setSize (Dimension2i (mSize.width - 2 * extra, mSize.height));
+			mChild->setSize (Surrounding2i::remove (mSize, Surrounding2i (extra, 0, extra, 0)));
 			// mChild->layoutChildren(engine);
 		} else {
 			SingleHolder::layoutChildren(engine);
@@ -281,52 +284,70 @@ protected:
 /** Draws item vertically above each other. */
 class VerticalContainer : public Container {
 public:
+	VerticalContainer() {
+		mTopSum = 0;
+	}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
-		Dimension2i minSpace;
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		Surrounding2i minSpace;
 		for (int i = 0; i < childCount(); i++) {
-			Dimension2i childSpace = child(i)->minSize(engine);
-			minSpace.width = std::max (minSpace.width, childSpace.width);
-			minSpace.height += childSpace.height;
+			Surrounding2i childSpace = child(i)->minSize(engine);
+			minSpace.left   = std::max (minSpace.left, childSpace.left);
+			minSpace.right  = std::max (minSpace.right, childSpace.right);
+			minSpace.top    += childSpace.top;
+			minSpace.bottom += childSpace.bottom;
 		}
+		mTopSum  = minSpace.top;
 		return minSpace;
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		Point2i current = (Point2i (0,0));
+		Point2i current = (Point2i (0,-mTopSum));
 		for (int i = 0; i < childCount(); i++) {
-			Dimension2i minSpace = child(i)->minSize(engine);
+			Surrounding2i minSpace = child(i)->minSize(engine);
 			child(i)->setPosition(current);
-			child(i)->setSize (Dimension2i (mSize.width, minSpace.height));
-			current.y += minSpace.height;
+			child(i)->setSize (Surrounding2i (mSize.left, minSpace.top, mSize.right, minSpace.bottom));
+			current.y += minSpace.bottom;
+			current.y += minSpace.top;
 		}
 	}
+private:
+	mutable int mTopSum;
 };
 
 /** Draws item vertically next to each other. */
 class HorizontalContainer : public Container {
 public:
+	HorizontalContainer()
+	{
+		mLeftSum = 0;
+	}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
-		Dimension2i minSpace;
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		Surrounding2i minSpace;
 		for (int i = 0; i < childCount(); i++) {
-			Dimension2i childSpace = child(i)->minSize(engine);
-			minSpace.width += childSpace.width;
-			minSpace.height =  std::max (minSpace.height, childSpace.height);
+			Surrounding2i childSpace = child(i)->minSize(engine);
+			minSpace.right += childSpace.right;
+			minSpace.left  += childSpace.left;
+			minSpace.top    = std::max (minSpace.top, childSpace.top);
+			minSpace.bottom = std::max (minSpace.bottom, childSpace.bottom);
 		}
+		mLeftSum = minSpace.left;
 		return minSpace;
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		Point2i current = (Point2i (0,0));
+		Point2i current = (Point2i (-mLeftSum,0));
 		for (int i = 0; i < childCount(); i++) {
-			Dimension2i minSpace = child(i)->minSize(engine);
+			Surrounding2i minSpace = child(i)->minSize(engine);
 			child(i)->setPosition(current);
-			child(i)->setSize (Dimension2i (minSpace.width, mSize.height));
-			// child(i)->layoutChildren(engine);
-			current.x += minSpace.width;
+			child(i)->setSize (Surrounding2i (minSpace.left, mSize.top, minSpace.right, mSize.bottom));
+			current.x += minSpace.left;
+			current.x += minSpace.right;
 		}
 	}
+private:
+	mutable int mLeftSum;
 };
 
 
@@ -420,20 +441,18 @@ public:
 		return BoxPtr();
 	}
 
-	virtual Dimension2i calcMinSpace (const DrawEngine & engine) const {
-		Dimension2i lowerSpace = mLower->minSize(engine);
-		Dimension2i upperSpace = mHigher->minSize(engine);
-		return Dimension2i (lowerSpace.width + upperSpace.width, lowerSpace.height + upperSpace.height);
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		Surrounding2i lowerSpace = mLower->minSize(engine);
+		Surrounding2i upperSpace = mHigher->minSize(engine);
+		return Surrounding2i (lowerSpace.left, lowerSpace.top + upperSpace.top, lowerSpace.right + upperSpace.right, lowerSpace.bottom);
 	}
 
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		Dimension2i lowerSpace = mLower->minSize(engine);
-		Dimension2i upperSpace = mHigher->minSize(engine);
-		mLower->setPosition (Point2i (0, upperSpace.height));
-		mLower->setSize(lowerSpace);
-		mHigher->setPosition(Point2i (lowerSpace.width, 0));
-		mHigher->setSize (upperSpace);
+		Surrounding2i lowerSpace = mLower->minSize(engine);
+		Surrounding2i upperSpace = mHigher->minSize(engine);
+		mLower->setPosition (Point2i (0,0));
+		mHigher->setPosition (Point2i (lowerSpace.right + upperSpace.left, lowerSpace.top + upperSpace.bottom));
 	}
 
 private:

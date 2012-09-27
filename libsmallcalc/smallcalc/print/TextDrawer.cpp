@@ -20,34 +20,34 @@ void TextDrawer::drawText (const std::string & s) {
 	line().replace (mStack.pos().x, s);
 }
 
-Dimension2i TextDrawer::textSize (const std::string & s) const {
-	return Dimension2i (Utf8Line::stringLength(s), 1);
+Surrounding2i TextDrawer::textSize (const std::string & s) const {
+	return Surrounding2i (0,0,Utf8Line::stringLength(s), 1);
 }
 
 void TextDrawer::drawLine (int length) {
 	line().replacePattern (mStack.pos().x, length, "─");
 }
 
-void TextDrawer::drawParanthesis (const Dimension2i & size, ParanthesisType type) {
-	if (size.height < 2) {
+void TextDrawer::drawParanthesis (const Surrounding2i & size, ParanthesisType type) {
+	if (size.right < 2) {
 		std::string c = type == B_LEFT ? "(" : ")";
-		for (int i = 0; i < size.height; i++) {
+		for (int i = 0; i < size.bottom; i++) {
 			line (i).replace (mStack.pos().x, c);
 		}
 	} else {
 		std::string c = type == B_LEFT ? "╭" : "╮";
 		line(0).replace(mStack.pos().x, c);
 		c = "│";
-		for (int i = 1; i < size.height - 1; i++) {
+		for (int i = 1; i < size.bottom - 1; i++) {
 			line(i).replace(mStack.pos().x, c);
 		}
 		c = type == B_LEFT ? "╰" : "╯";
-		line(size.height-1).replace(mStack.pos().x, c);
+		line(size.bottom-1).replace(mStack.pos().x, c);
 	}
 }
 
-Surrounding2i TextDrawer::paranthesisExtraSpace (const Dimension2i & i) const {
-	if (i.height == 1) return Surrounding2i ();
+Surrounding2i TextDrawer::paranthesisExtraSpace (const Surrounding2i & i) const {
+	if (i.height() == 1) return Surrounding2i ();
 	return Surrounding2i (1,1,1,1);
 }
 
@@ -71,7 +71,11 @@ void TextDrawer::draw (const BoxPtr & box) {
 }
 
 void TextDrawer::drawLayouted (BoxPtr box) {
-	BoxPtr root = boost::make_shared<RootBox> (mStack.space(), box);
+	Surrounding2i size = box->minSize (*this);
+	assert (mStack.space().width >= size.width());
+	assert (mStack.space().height >= size.height());
+	BoxPtr root = boost::make_shared<RootBox> (size, box);
+	root->setPosition (Point2i (size.left, size.top));
 	layoutTree (root);
 	draw (root);
 }

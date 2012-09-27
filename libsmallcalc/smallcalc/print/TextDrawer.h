@@ -18,7 +18,7 @@ public:
 	}
 
 	TextDrawer (BoxPtr destination) {
-		setSize (destination->minSize(*this));
+		setSize (destination->minSize(*this).size());
 	}
 
 	/// Set text box size
@@ -29,12 +29,12 @@ public:
 	// Implementation of DrawEngine
 	virtual void drawText (const std::string & s);
 
-	Dimension2i textSize (const std::string & s) const;
+	Surrounding2i textSize (const std::string & s) const;
 
 	virtual void drawLine (int length);
 
-	virtual void drawParanthesis (const Dimension2i & size, ParanthesisType type);
-	virtual Surrounding2i paranthesisExtraSpace (const Dimension2i & i) const;
+	virtual void drawParanthesis (const Surrounding2i & size, ParanthesisType type);
+	virtual Surrounding2i paranthesisExtraSpace (const Surrounding2i & i) const;
 
 
 	/** Layout a whole tree.*/
