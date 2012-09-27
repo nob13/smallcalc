@@ -1,4 +1,5 @@
 #pragma once
+#include <ostream>
 
 /**
  * @file some basic geometrical types
@@ -12,6 +13,12 @@ struct Point2i {
 	int x;
 	int y;
 };
+inline std::ostream& operator<< (std::ostream & o, const Point2i & p) {
+	return o << "(" << p.x << "," << p.y << ")";
+}
+inline bool operator== (const Point2i & a, const Point2i & b) {
+	return a.x == b.x && a.y == b.y;
+}
 
 /** Size in space .*/
 struct Dimension2i {
@@ -19,6 +26,9 @@ struct Dimension2i {
 	int width;
 	int height;
 };
+inline std::ostream& operator<< (std::ostream & o, const Dimension2i & d) {
+	return o << "(" << d.width << "x" << d.height << ")";
+}
 
 /** Rectangular scene. */
 struct Scene {
@@ -71,10 +81,10 @@ struct Surrounding2i {
 	static Surrounding2i remove (const Surrounding2i & a, const Surrounding2i & b) {
 		return Surrounding2i (a.left - b.left, a.top - b.top, a.right - b.right, a.bottom - b.bottom);
 	}
-
-
 };
 
-
+inline std::ostream& operator<< (std::ostream & o, const Surrounding2i & p) {
+	return o << "[" << p.left << "," << p.top << "," << p.right << "," << p.bottom << "]";
+}
 
 }

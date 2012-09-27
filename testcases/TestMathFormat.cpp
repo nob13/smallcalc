@@ -44,14 +44,18 @@ TEST (TestMathFormat2, testUtf8Lineregression) {
 	ASSERT_EQ (line.asUtf8(), "------");
 }
 
-
+#if 0
 TEST (TestMathFormat2, testHCenter) {
+	// Es kann sein, dass der Testcase so nicht mehr funktionieren kann
+	// Weil er der RootBox die falsche (kleinere) Größe gibt.
 	BoxPtr target  = boost::make_shared<HCenterBox> (boost::make_shared<TextBox> ("Hallo"));
 	Dimension2i size (12, 1);
 	TextDrawer drawer (Dimension2i (12, 1));
 	drawer.drawLayouted(target);
 	drawer.print (std::cout);
+	std::cout << std::endl;
 }
+#endif
 
 TEST (TestMathFormat2, simpleFraction) {
 	BoxPtr upper  = boost::make_shared<TextBox> ("sin(x)");
@@ -60,6 +64,7 @@ TEST (TestMathFormat2, simpleFraction) {
 	TextDrawer drawer (target);
 	drawer.drawLayouted(target);
 	drawer.print (std::cout);
+	std::cout << std::endl;
 }
 
 
@@ -74,6 +79,7 @@ TEST (TestMathFormat2, simplePrint) {
 	TextDrawer drawer (target);
 	drawer.drawLayouted(target);
 	drawer.print (std::cout);
+	std::cout << std::endl;
 }
 
 void printAsBox (ExpressionPtr exp) {
@@ -86,8 +92,48 @@ void printAsBox (const PrimitiveValue& val) {
 	std::cout << print (val) << std::endl;
 }
 
+TEST (TestMathFormat2, testHorizontalContainer) {
+	TextDrawer drawer;
+	shared_ptr<HorizontalContainer> container (new HorizontalContainer());
+	container->addChild(DummyBox::create (Surrounding2i (1,1,2,2)));
+	container->addChild(DummyBox::create (Surrounding2i (1,2,2,2)));
+	Surrounding2i surrounding = container->minSize(drawer);
+	ASSERT_EQ (surrounding.width(),  6);
+	ASSERT_EQ (surrounding.height(), 4);
+	ASSERT_EQ (surrounding.left,   2);
+	ASSERT_EQ (surrounding.top,    2);
+	ASSERT_EQ (surrounding.right,  4);
+	ASSERT_EQ (surrounding.bottom, 2);
 
-TEST (TestMathFormat2, autoConersion) {
+	container->setSize (surrounding);
+	drawer.layoutTree(container);
+	ASSERT_EQ (container->position(), Point2i (0,0));
+	ASSERT_EQ (container->child(0)->position (), Point2i (-1, 0));
+	ASSERT_EQ (container->child(1)->position (), Point2i (2, 0));
+}
+
+TEST (TestMathFormat2, testVerticalContainer) {
+	TextDrawer drawer;
+	shared_ptr<VerticalContainer> container (new VerticalContainer());
+	container->addChild(DummyBox::create (Surrounding2i (1,1,2,2)));
+	container->addChild(DummyBox::create (Surrounding2i (1,2,2,2)));
+	Surrounding2i surrounding = container->minSize(drawer);
+	ASSERT_EQ (surrounding.width(),  3);
+	ASSERT_EQ (surrounding.height(), 7);
+	ASSERT_EQ (surrounding.left,   1);
+	ASSERT_EQ (surrounding.top,    3);
+	ASSERT_EQ (surrounding.right,  2);
+	ASSERT_EQ (surrounding.bottom, 4);
+
+	container->setSize (surrounding);
+	drawer.layoutTree(container);
+	ASSERT_EQ (container->position(), Point2i (0,0));
+	ASSERT_EQ (container->child(0)->position (), Point2i (0,-2));
+	ASSERT_EQ (container->child(1)->position (), Point2i (0,2));
+}
+
+
+TEST (TestMathFormat2, autoConversion) {
 	SmallCalc sc;
 	sc.addAllStandard();
 	printAsBox (sc.parse("1/x"));
@@ -97,6 +143,7 @@ TEST (TestMathFormat2, autoConersion) {
 	printAsBox (sc.parse("(1-4)+2/2+3+(4/x)+ -2/µ"));
 	printAsBox (sc.parse ("1*(2+3)"));
 	printAsBox (sc.parse ("-(1/2)"));
+	printAsBox (sc.parse ("2*(3+1)"));
 	printAsBox (sc.parse ("2*(3+1/4)"));
 	printAsBox (sc.parse ("(3*1/4)"));
 	printAsBox (sc.parse ("sin(1/x)"));

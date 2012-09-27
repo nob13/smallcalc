@@ -60,7 +60,23 @@ public:
 		return mMinSize;
 	}
 
+
+	/** Recursivly print tree. */
+	void printTree (std::ostream & stream, int depth = 0) const {
+		printEmptys (stream, depth);
+		stream << typeid (*this).name() << " pos=" << mPosition << " size=" << mSize << std::endl;
+		for (int i = 0; i < childCount(); i++) {
+			child(i)->printTree(stream, depth + 1);
+		}
+	}
+
 protected:
+	void static printEmptys (std::ostream & stream, int depth) {
+		for (int i = 0; i < depth; i++) {
+			stream << " ";
+		}
+	}
+
 	/// Returns minimal space the box will use
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const = 0;
 
@@ -120,7 +136,7 @@ public:
 
 class TextBox : public Box {
 public:
-	TextBox (const std::string & text) : mText (text) {}
+	TextBox (const std::string & text) : mText (text) { }
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const { return engine.textSize (mText); }
 	virtual void draw (DrawEngine & engine) const {
 		engine.drawText(mText);
@@ -132,8 +148,9 @@ private:
 /** A Box holding a horizontal line. */
 class LineBox : public Box {
 public:
+	LineBox() {}
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
-		return Surrounding2i (0,0,1,0);
+		return Surrounding2i (0,0,0,1);
 	}
 	virtual void draw (DrawEngine & engine) const {
 		return engine.drawLine (mSize.right);
@@ -144,7 +161,6 @@ public:
 class HCenterBox : public SingleHolder {
 public:
 	HCenterBox (const BoxPtr & child) : SingleHolder (child) {
-
 	}
 
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
@@ -213,6 +229,7 @@ public:
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
 		Surrounding2i childSpace = mChild->minSize(engine);
 		Surrounding2i s = engine.paranthesisExtraSpace(childSpace);
+		mAppendedSpace = s;
 		return Surrounding2i::append (childSpace, s);
 	}
 
@@ -221,6 +238,8 @@ public:
 		mChild->setPosition (Point2i (s.left, s.top));
 		mChild->setSize (Surrounding2i::remove (mSize, s));
 	}
+private:
+	mutable Surrounding2i mAppendedSpace;
 
 };
 
@@ -305,10 +324,10 @@ public:
 		Point2i current = (Point2i (0,-mTopSum));
 		for (int i = 0; i < childCount(); i++) {
 			Surrounding2i minSpace = child(i)->minSize(engine);
+			current.y += minSpace.top;
 			child(i)->setPosition(current);
 			child(i)->setSize (Surrounding2i (mSize.left, minSpace.top, mSize.right, minSpace.bottom));
 			current.y += minSpace.bottom;
-			current.y += minSpace.top;
 		}
 	}
 private:
@@ -340,9 +359,9 @@ public:
 		Point2i current = (Point2i (-mLeftSum,0));
 		for (int i = 0; i < childCount(); i++) {
 			Surrounding2i minSpace = child(i)->minSize(engine);
+			current.x += minSpace.left;
 			child(i)->setPosition(current);
 			child(i)->setSize (Surrounding2i (minSpace.left, mSize.top, minSpace.right, mSize.bottom));
-			current.x += minSpace.left;
 			current.x += minSpace.right;
 		}
 	}
@@ -469,7 +488,24 @@ public:
 	}
 };
 
+/** A Dummy box which just wastes given space. */
+class DummyBox : public Box {
+public:
+	// Implementation of Box
+	DummyBox (const Surrounding2i & space) : mSpace (space) {}
 
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		return mSpace;
+	}
+
+
+	virtual void layoutChildren (const DrawEngine & engine) {
+	}
+
+	static BoxPtr create (const Surrounding2i & space) { return boost::make_shared<DummyBox> (space); }
+private:
+	Surrounding2i mSpace;
+};
 
 
 }

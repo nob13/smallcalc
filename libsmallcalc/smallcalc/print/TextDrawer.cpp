@@ -17,6 +17,7 @@ TextDrawer::TextDrawer (const Dimension2i & dim){
 }
 
 void TextDrawer::drawText (const std::string & s) {
+	assert (mStack.pos().x >= 0);
 	line().replace (mStack.pos().x, s);
 }
 
@@ -29,7 +30,7 @@ void TextDrawer::drawLine (int length) {
 }
 
 void TextDrawer::drawParanthesis (const Surrounding2i & size, ParanthesisType type) {
-	if (size.right < 2) {
+	if (size.bottom < 2) {
 		std::string c = type == B_LEFT ? "(" : ")";
 		for (int i = 0; i < size.bottom; i++) {
 			line (i).replace (mStack.pos().x, c);
@@ -60,14 +61,14 @@ void TextDrawer::layoutTree (const BoxPtr & box) {
 
 
 void TextDrawer::draw (const BoxPtr & box) {
+	mStack.push();
+	mStack.moveCursor (box->position());
 	box->draw(*this);
 	for (int i = 0; i < box->childCount(); i++) {
 		BoxPtr child (box->child(i));
-		mStack.push ();
-		mStack.moveCursor (child->position());
 		draw (child);
-		mStack.pop ();
 	}
+	mStack.pop();
 }
 
 void TextDrawer::drawLayouted (BoxPtr box) {
@@ -77,6 +78,7 @@ void TextDrawer::drawLayouted (BoxPtr box) {
 	BoxPtr root = boost::make_shared<RootBox> (size, box);
 	root->setPosition (Point2i (size.left, size.top));
 	layoutTree (root);
+	// root->printTree(std::cout);
 	draw (root);
 }
 
