@@ -164,13 +164,14 @@ public:
 	}
 
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
-		return mChild->minSize(engine);
+		Surrounding2i childSpace = mChild->minSize(engine);
+		return Surrounding2i (0,childSpace.top,childSpace.width(), childSpace.bottom);
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
 		Surrounding2i childSize = mChild->minSize(engine);
 		int childWidth = childSize.width();
-		int i  = (mSize.width() - childWidth) / 2;
+		int i  = childSize.left + (mSize.width() - childWidth) / 2;
 		mChild->setPosition (Point2i (i, 0));
 		mChild->setSize (Surrounding2i (childSize.left, mSize.top, childSize.right, mSize.bottom));
 	}
@@ -184,13 +185,14 @@ public:
 	}
 
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
-		return mChild->minSize(engine);
+		Surrounding2i childSize = mChild->minSize (engine);
+		return Surrounding2i (childSize.left, 0, childSize.right, childSize.height());
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
 		Surrounding2i childSize = mChild->minSize (engine);
 		int childHeight = childSize.height();
-		int i = (mSize.height() - childHeight) / 2;
+		int i = childSize.top + (mSize.height() - childHeight) / 2;
 		mChild->setPosition (Point2i (0, i));
 		mChild->setSize (Surrounding2i (mSize.left, childSize.top, mSize.right, childSize.bottom));
 	}
