@@ -267,9 +267,8 @@ public:
 	virtual void layoutChildren (const DrawEngine & engine) {
 		if (mChild->flags() & F_NeedsClosedHSpace) {
 			int extra = engine.horizontalExtraSpace();
-			mChild->setPosition (Point2i (extra, 0));
+			mChild->setPosition (Point2i (0, 0));
 			mChild->setSize (Surrounding2i::remove (mSize, Surrounding2i (extra, 0, extra, 0)));
-			// mChild->layoutChildren(engine);
 		} else {
 			SingleHolder::layoutChildren(engine);
 		}
