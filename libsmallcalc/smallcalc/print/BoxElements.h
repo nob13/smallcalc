@@ -234,9 +234,8 @@ public:
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		Surrounding2i s = engine.paranthesisExtraSpace(mSize);
-		mChild->setPosition (Point2i (s.left, s.top));
-		mChild->setSize (Surrounding2i::remove (mSize, s));
+		mChild->setPosition (Point2i (0,0));
+		mChild->setSize (Surrounding2i::remove (mSize, mAppendedSpace));
 	}
 private:
 	mutable Surrounding2i mAppendedSpace;
@@ -377,6 +376,10 @@ public:
 		addChild (BoxPtr(new Paranthesis(DrawEngine::B_LEFT)));
 		addChild (BoxPtr(new ParanthesisSpaceProvider(child)));
 		addChild (BoxPtr(new Paranthesis(DrawEngine::B_RIGHT)));
+	}
+
+	virtual void layoutChildren (const DrawEngine & engine) {
+		HorizontalContainer::layoutChildren(engine);
 	}
 };
 
