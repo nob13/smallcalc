@@ -47,9 +47,34 @@ void TextDrawer::drawParanthesis (const Surrounding2i & size, ParanthesisType ty
 	}
 }
 
+void TextDrawer::drawSquareRoot (const Surrounding2i & size) {
+	if (size.height() == 1) {
+		line(0).replace (mStack.pos().x - size.left, "√");
+	} else {
+		line(0).replace (mStack.pos().x - size.left, "┤");
+		int x = mStack.pos().x - size.left;
+		for (int i = 1; i < size.bottom; i++) {
+			line(i).replace (x, "│");
+		}
+		for (int i = 1; i < size.top; i++) {
+			line(-i).replace (x, "│");
+		}
+		int y = -(size.top);
+		line (y).replace (x, "┌");
+		for (int i = 0; i < size.right; i++) {
+			line(y).replace(mStack.pos().x + i, "─");
+		}
+	}
+}
+
+
 Surrounding2i TextDrawer::paranthesisExtraSpace (const Surrounding2i & i) const {
 	if (i.height() == 1) return Surrounding2i ();
 	return Surrounding2i (1,1,1,1);
+}
+
+Surrounding2i TextDrawer::squareRootExtraSpace (const Surrounding2i & i) const {
+	return Surrounding2i (1,1,0,0);
 }
 
 void TextDrawer::layoutTree (const BoxPtr & box) {
@@ -78,7 +103,6 @@ void TextDrawer::drawLayouted (BoxPtr box) {
 	BoxPtr root = boost::make_shared<RootBox> (size, box);
 	root->setPosition (Point2i (size.left, size.top));
 	layoutTree (root);
-	// root->printTree(std::cout);
 	draw (root);
 }
 

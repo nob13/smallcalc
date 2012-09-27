@@ -34,7 +34,9 @@ public:
 	virtual void drawLine (int length);
 
 	virtual void drawParanthesis (const Surrounding2i & size, ParanthesisType type);
+	virtual void drawSquareRoot (const Surrounding2i & size);
 	virtual Surrounding2i paranthesisExtraSpace (const Surrounding2i & i) const;
+	virtual Surrounding2i squareRootExtraSpace (const Surrounding2i & i) const;
 
 
 	/** Layout a whole tree.*/

@@ -62,6 +62,8 @@ BoxPtr convertExpression (ExpressionPtr exp, int currentPrecedence) {
 			BoxPtr base     = addParanthesisIfNotTrivial (namedExp->argument(0));
 			BoxPtr exponent = addParanthesisIfNotTrivial (namedExp->argument(1));
 			return boost::make_shared<PowerBox> (base,exponent);
+		} else if (func->name() == "sqrt" && namedExp->argumentCount() == 1) {
+			return boost::make_shared<SquareRootBox> (convertExpression(namedExp->argument(0)));
 		} else if (func->notation() == FN_INFIX) {
 			bool canSkipParanthesis = false;
 			if (func->precedence() > currentPrecedence) {

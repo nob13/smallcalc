@@ -242,8 +242,33 @@ public:
 	}
 private:
 	mutable Surrounding2i mAppendedSpace;
-
 };
+
+/** Draws something inside a square root sign */
+class SquareRootBox : public SingleHolder {
+public:
+	SquareRootBox (const BoxPtr & child) : SingleHolder (child) {
+	}
+
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		Surrounding2i childSpace = mChild->minSize(engine);
+		Surrounding2i s = engine.squareRootExtraSpace(childSpace);
+		mAppendedSpace = s;
+		return Surrounding2i::append (childSpace, s);
+	}
+
+	virtual void layoutChildren (const DrawEngine & engine) {
+		mChild->setPosition (Point2i (0,0));
+		mChild->setSize (Surrounding2i::remove (mSize, mAppendedSpace));
+	}
+
+	virtual void draw (DrawEngine & engine) const {
+		engine.drawSquareRoot(mSize);
+	}
+private:
+	mutable Surrounding2i mAppendedSpace;
+};
+
 
 class HorizontalSpaceProviderBox : public SingleHolder {
 public:
@@ -392,7 +417,6 @@ public:
 	static BoxPtr create (const BoxPtr & child) { return boost::make_shared<ParanthesisBox>(child); }
 };
 
-
 /** A Box which paints a fraction.*/
 class FractionBox : public VerticalContainer {
 public:
@@ -400,7 +424,9 @@ public:
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
 		// Move Verticalcontainer a bit above, so that the line is on zero level
 		mYOffset = 0 - child(0)->minSize(engine).height();
-		return VerticalContainer::calcMinSpace(engine);
+		Surrounding2i s = VerticalContainer::calcMinSpace(engine);
+		assert (s.left >= 0 && s.top >= 0 && s.bottom >= 0 && s.right >= 0);
+		return s;
 	}
 
 	FractionBox (const BoxPtr & numerator, const BoxPtr & denumerator) {

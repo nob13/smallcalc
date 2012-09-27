@@ -14,6 +14,8 @@ public:
 
 	virtual void drawParanthesis (const Surrounding2i & size, ParanthesisType type) = 0;
 
+	virtual void drawSquareRoot (const Surrounding2i & size) = 0;
+
 	/// How many space if some elements needs horizontal extra space
 	virtual int horizontalExtraSpace () const { return 1;}
 	/// How many space if some elements needs vertical extra space
@@ -23,6 +25,9 @@ public:
 
 	/// Returns surroing if paranthesis for a given object need them
 	virtual Surrounding2i paranthesisExtraSpace (const Surrounding2i & i) const { return Surrounding2i (); }
+
+	/// Returns surrounding needed for a square root sign around a given object
+	virtual Surrounding2i squareRootExtraSpace (const Surrounding2i & i) const = 0;
 };
 
 
