@@ -46,7 +46,8 @@ public:
 	virtual BoxPtr child (int i) const { return BoxPtr(); }
 
 	enum BoxFlag {
-		F_NeedsClosedHSpace = 1 // The box needs closed horizontal space
+		F_NeedsClosedHSpace = 1, // The box needs closed horizontal space
+		F_NeedsClosedVSpace = 2 // The box needs closed vertical space
 	};
 
 	/// The flags a box has
@@ -383,6 +384,7 @@ public:
 	virtual void layoutChildren (const DrawEngine & engine) {
 		HorizontalContainer::layoutChildren(engine);
 	}
+	static BoxPtr create (const BoxPtr & child) { return boost::make_shared<ParanthesisBox>(child); }
 };
 
 
@@ -395,7 +397,7 @@ public:
 		addChild (BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (denumerator)))));
 	}
 
-	virtual int flags() const { return F_NeedsClosedHSpace; }
+	virtual int flags() const { return F_NeedsClosedHSpace | F_NeedsClosedVSpace; }
 };
 
 /** A Box which paints a primitive (+,-,*) function.*/
@@ -408,10 +410,10 @@ public:
 	void addArgument (const BoxPtr & box) {
 		if (!mChildren.empty()) {
 			addChild (BoxPtr (new HSpace ()));
-			addChild (BoxPtr (new VCenterBox (BoxPtr (new TextBox(mSeparator)))));
+			addChild (BoxPtr (new TextBox(mSeparator)));
 			addChild (BoxPtr (new HSpace()));
 		}
-		addChild (BoxPtr (new VCenterBox (box)));
+		addChild (BoxPtr (box));
 	}
 
 private:
@@ -468,7 +470,11 @@ public:
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
 		Surrounding2i lowerSpace = mLower->minSize(engine);
 		Surrounding2i upperSpace = mHigher->minSize(engine);
-		return Surrounding2i (lowerSpace.left, lowerSpace.top + upperSpace.top, lowerSpace.right + upperSpace.right, lowerSpace.bottom);
+		return Surrounding2i (
+				lowerSpace.left,
+				lowerSpace.top + upperSpace.top + upperSpace.bottom,
+				upperSpace.left + lowerSpace.right + upperSpace.right,
+				lowerSpace.bottom);
 	}
 
 
@@ -476,7 +482,9 @@ public:
 		Surrounding2i lowerSpace = mLower->minSize(engine);
 		Surrounding2i upperSpace = mHigher->minSize(engine);
 		mLower->setPosition (Point2i (0,0));
-		mHigher->setPosition (Point2i (lowerSpace.right + upperSpace.left, lowerSpace.top + upperSpace.bottom));
+		mLower->setSize (lowerSpace);
+		mHigher->setPosition (Point2i (lowerSpace.right + upperSpace.left, 0 - (lowerSpace.top + upperSpace.bottom)));
+		mHigher->setSize (upperSpace);
 	}
 
 private:
