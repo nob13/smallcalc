@@ -30,17 +30,17 @@ void TextDrawer::drawLine (int length) {
 }
 
 void TextDrawer::drawParanthesis (const Surrounding2i & size, ParanthesisType type) {
-	if (size.bottom < 2) {
+	if (size.height() < 2) {
 		std::string c = type == B_LEFT ? "(" : ")";
 		for (int i = 0; i < size.bottom; i++) {
 			line (i).replace (mStack.pos().x, c);
 		}
 	} else {
 		std::string c = type == B_LEFT ? "╭" : "╮";
-		line(0).replace(mStack.pos().x, c);
+		line(-size.top).replace(mStack.pos().x, c);
 		c = "│";
-		for (int i = 1; i < size.bottom - 1; i++) {
-			line(i).replace(mStack.pos().x, c);
+		for (int i = 1; i < size.height() - 1; i++) {
+			line(i - size.top).replace(mStack.pos().x, c);
 		}
 		c = type == B_LEFT ? "╰" : "╯";
 		line(size.bottom-1).replace(mStack.pos().x, c);
