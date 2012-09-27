@@ -306,7 +306,8 @@ protected:
 class VerticalContainer : public Container {
 public:
 	VerticalContainer() {
-		mTopSum = 0;
+		mTopSum  = 0;
+		mYOffset = 0;
 	}
 
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
@@ -319,11 +320,13 @@ public:
 			minSpace.bottom += childSpace.bottom;
 		}
 		mTopSum  = minSpace.top;
+		minSpace.top    -= mYOffset;
+		minSpace.bottom += mYOffset;
 		return minSpace;
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		Point2i current = (Point2i (0,-mTopSum));
+		Point2i current = (Point2i (0,-mTopSum + mYOffset));
 		for (int i = 0; i < childCount(); i++) {
 			Surrounding2i minSpace = child(i)->minSize(engine);
 			current.y += minSpace.top;
@@ -332,6 +335,9 @@ public:
 			current.y += minSpace.bottom;
 		}
 	}
+
+protected:
+	mutable int mYOffset; //< Hack: Can be overriden by child classes to move result up a bit (negative offset) or down
 private:
 	mutable int mTopSum;
 };
@@ -391,6 +397,13 @@ public:
 /** A Box which paints a fraction.*/
 class FractionBox : public VerticalContainer {
 public:
+
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		// Move Verticalcontainer a bit above, so that the line is on zero level
+		mYOffset = 0 - child(0)->minSize(engine).height();
+		return VerticalContainer::calcMinSpace(engine);
+	}
+
 	FractionBox (const BoxPtr & numerator, const BoxPtr & denumerator) {
 		addChild (BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (numerator))))); // numerator
 		addChild (BoxPtr (new LineBox()));
