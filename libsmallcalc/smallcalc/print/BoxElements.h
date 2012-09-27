@@ -424,9 +424,8 @@ private:
 class RegularFunctionBox : public HorizontalContainer {
 public:
 	RegularFunctionBox (const std::string & name, const BoxPtr & argument) {
-		addChild (BoxPtr (new VCenterBox (BoxPtr (new TextBox (name)))));
-		// addChild (BoxPtr (new HSpace ()));
-		addChild (BoxPtr (new VCenterBox (BoxPtr (argument))));
+		addChild (BoxPtr (new TextBox (name)));
+		addChild (argument);
 	}
 };
 
