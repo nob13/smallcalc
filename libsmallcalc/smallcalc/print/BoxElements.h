@@ -331,7 +331,6 @@ class VerticalContainer : public Container {
 public:
 	VerticalContainer() {
 		mTopSum  = 0;
-		mYOffset = 0;
 	}
 
 	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
@@ -344,13 +343,11 @@ public:
 			minSpace.bottom += childSpace.bottom;
 		}
 		mTopSum  = minSpace.top;
-		minSpace.top    -= mYOffset;
-		minSpace.bottom += mYOffset;
 		return minSpace;
 	}
 
 	virtual void layoutChildren (const DrawEngine & engine) {
-		Point2i current = (Point2i (0,-mTopSum + mYOffset));
+		Point2i current = (Point2i (0,-mTopSum));
 		for (int i = 0; i < childCount(); i++) {
 			Surrounding2i minSpace = child(i)->minSize(engine);
 			current.y += minSpace.top;
@@ -360,8 +357,6 @@ public:
 		}
 	}
 
-protected:
-	mutable int mYOffset; //< Hack: Can be overriden by child classes to move result up a bit (negative offset) or down
 private:
 	mutable int mTopSum;
 };
@@ -417,30 +412,9 @@ public:
 	static BoxPtr create (const BoxPtr & child) { return boost::make_shared<ParanthesisBox>(child); }
 };
 
-/** A Box which paints a fraction.*/
-class FractionBox : public VerticalContainer {
+class FractionBox : public Box{
 public:
-
-	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
-		// Move Verticalcontainer a bit above, so that the line is on zero level
-		mYOffset = 0 - child(0)->minSize(engine).height();
-		Surrounding2i s = VerticalContainer::calcMinSpace(engine);
-		// assert (s.left >= 0 && s.top >= 0 && s.bottom >= 0 && s.right >= 0);
-		return s;
-	}
-
 	FractionBox (const BoxPtr & numerator, const BoxPtr & denumerator) {
-		addChild (BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (numerator))))); // numerator
-		addChild (BoxPtr (new LineBox()));
-		addChild (BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (denumerator)))));
-	}
-
-	virtual int flags() const { return F_NeedsClosedHSpace | F_NeedsClosedVSpace; }
-};
-
-class FractionBox2 : public Box{
-public:
-	FractionBox2 (const BoxPtr & numerator, const BoxPtr & denumerator) {
 		mNumerator = BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (numerator))));
 		mDenumerator = (BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (denumerator)))));
 		mLine = BoxPtr (new LineBox());
