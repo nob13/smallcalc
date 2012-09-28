@@ -425,7 +425,7 @@ public:
 		// Move Verticalcontainer a bit above, so that the line is on zero level
 		mYOffset = 0 - child(0)->minSize(engine).height();
 		Surrounding2i s = VerticalContainer::calcMinSpace(engine);
-		assert (s.left >= 0 && s.top >= 0 && s.bottom >= 0 && s.right >= 0);
+		// assert (s.left >= 0 && s.top >= 0 && s.bottom >= 0 && s.right >= 0);
 		return s;
 	}
 
@@ -436,6 +436,56 @@ public:
 	}
 
 	virtual int flags() const { return F_NeedsClosedHSpace | F_NeedsClosedVSpace; }
+};
+
+class FractionBox2 : public Box{
+public:
+	FractionBox2 (const BoxPtr & numerator, const BoxPtr & denumerator) {
+		mNumerator = BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (numerator))));
+		mDenumerator = (BoxPtr (new HCenterBox (BoxPtr (new HorizontalSpaceProviderBox (denumerator)))));
+		mLine = BoxPtr (new LineBox());
+	}
+	virtual int flags() const { return F_NeedsClosedHSpace | F_NeedsClosedVSpace; }
+
+
+
+	virtual Surrounding2i calcMinSpace (const DrawEngine & engine) const {
+		Surrounding2i numeratorSpace   = mNumerator->minSize(engine);
+		Surrounding2i lineSpace = mLine->minSize(engine);
+		Surrounding2i denumeratorSpace = mDenumerator->minSize(engine);
+		Surrounding2i result;
+		result.top    = numeratorSpace.top + numeratorSpace.bottom;
+		result.bottom = lineSpace.top + lineSpace.bottom + denumeratorSpace.top + denumeratorSpace.bottom;
+		result.left   = std::max (std::max (numeratorSpace.left, denumeratorSpace.left), lineSpace.left);
+		result.right  = std::max (std::max (numeratorSpace.right, denumeratorSpace.right), lineSpace.right);
+		return result;
+	}
+
+	virtual void layoutChildren (const DrawEngine & engine) {
+		Surrounding2i numeratorSpace = mNumerator->minSize (engine);
+		Surrounding2i denumeratorSpace = mDenumerator->minSize (engine);
+		Surrounding2i lineSpace = mLine->minSize(engine);
+		mNumerator->setSize (Surrounding2i (mSize.left, numeratorSpace.top, mSize.right, numeratorSpace.bottom));
+		mNumerator->setPosition (Point2i (0, -numeratorSpace.bottom));
+		mLine->setSize (Surrounding2i (mSize.left, lineSpace.top, mSize.right, lineSpace.bottom));
+		mLine->setPosition (Point2i (0,0));
+		mDenumerator->setSize (Surrounding2i (mSize.left, denumeratorSpace.top, mSize.right, denumeratorSpace.bottom));
+		mDenumerator->setPosition (Point2i (0,lineSpace.height() + denumeratorSpace.top));
+	}
+
+	virtual int childCount () const { return 3; }
+	virtual BoxPtr child (int i) const {
+		if (i == 0) return mNumerator;
+		if (i == 1) return mLine;
+		if (i == 2) return mDenumerator;
+		return BoxPtr();
+	}
+
+
+private:
+	BoxPtr mNumerator;
+	BoxPtr mLine;
+	BoxPtr mDenumerator;
 };
 
 /** A Box which paints a primitive (+,-,*) function.*/

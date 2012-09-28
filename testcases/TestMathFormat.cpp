@@ -156,15 +156,15 @@ TEST (TestMathFormat2, autoConversion) {
 	printAsBox (sc.parse ("4^2"));
 	printAsBox (sc.parse ("12 + x^2 + x^3 + 4 * x ^ (1/2)"));
 	printAsBox (sc.parse ("2/2"));
-	printAsBox (sc.parse ("2/2/2"));
-	printAsBox (sc.parse ("2/2/2/2"));
-	printAsBox (sc.parse ("2/2/2/2/2"));
+	printAsBox (sc.parse ("1/2/3"));
+	printAsBox (sc.parse ("1/2/3/4"));
+	printAsBox (sc.parse ("1/2/3/4/5"));
 	printAsBox (sc.parse ("sqrt(2)"));
 	printAsBox (sc.parse ("sqrt(2+2)"));
 	printAsBox (sc.parse ("sqrt(2+2+2)"));
 	printAsBox (sc.parse ("sqrt(2/2)"));
 	printAsBox (sc.parse ("sqrt(2/2/2)"));
-	printAsBox (sc.parse ("sqrt(2/2/2/2)"));
+	printAsBox (sc.parse ("3 * sqrt(2/2/2/2)"));
 
 }
 

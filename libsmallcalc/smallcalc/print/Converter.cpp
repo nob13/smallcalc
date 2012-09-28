@@ -55,7 +55,7 @@ BoxPtr convertExpression (ExpressionPtr exp, int currentPrecedence) {
 	if (namedExp) {
 		NamedFunctionPtr func = namedExp->function();
 		if (func->name() == "divide" && namedExp->argumentCount() == 2) {
-			return boost::make_shared<FractionBox> (
+			return boost::make_shared<FractionBox2> (
 					convertExpression (namedExp->argument(0)),
 					convertExpression(namedExp->argument(1)));
 		} else if (func->name() == "pow" && namedExp->argumentCount() == 2) {
