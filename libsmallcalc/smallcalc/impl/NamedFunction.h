@@ -48,7 +48,7 @@ public:
 	}
 
 	/// Overwrite default create expression callback
-	void setCrateExpressionCallback (const CreateExpressionCallback & createExpressionCallback){
+	void setCreateExpressionCallback (const CreateExpressionCallback & createExpressionCallback){
 		mCreateExpressionCallback = createExpressionCallback;
 	}
 

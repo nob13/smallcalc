@@ -81,7 +81,7 @@ void SmallCalc::addFundamentalFunctions () {
 
 	// Assignment is trickier
 	NamedFunctionPtr assignment  (new NamedFunction ("assignment", 2, 0, FN_INFIX, 1, false, "="));
-	assignment->setCrateExpressionCallback(&createAssignmentExpression);
+	assignment->setCreateExpressionCallback(&createAssignmentExpression);
 	mParserContext->addFunction(assignment);
 }
 
