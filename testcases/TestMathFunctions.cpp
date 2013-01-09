@@ -48,11 +48,11 @@ TEST(MathFunctions, noOverflow){
 TEST (MathFunctions, overflows){
 	// Addition
 	bool overflow = true;
-	EXPECT_EQ (addWithOverflowCheck (std::numeric_limits<int64_t>::max(), 1L, &overflow), std::numeric_limits<int64_t>::min());
+	EXPECT_EQ (addWithOverflowCheck (std::numeric_limits<int64_t>::max(), (int64_t)1, &overflow), std::numeric_limits<int64_t>::min());
 	EXPECT_EQ (overflow, true);
 	overflow = false;
 
-	EXPECT_EQ (addWithOverflowCheck (std::numeric_limits<int64_t>::min(), -1L, &overflow), std::numeric_limits<int64_t>::max());
+	EXPECT_EQ (addWithOverflowCheck (std::numeric_limits<int64_t>::min(), (int64_t)-1, &overflow), std::numeric_limits<int64_t>::max());
 	EXPECT_EQ (overflow, true);
 	overflow = false;
 
@@ -61,11 +61,11 @@ TEST (MathFunctions, overflows){
 	overflow = false;
 
 	// Subtraction
-	EXPECT_EQ (subWithOverflowCheck (std::numeric_limits<int64_t>::max(), -1L, &overflow), std::numeric_limits<int64_t>::min());
+	EXPECT_EQ (subWithOverflowCheck (std::numeric_limits<int64_t>::max(), (int64_t)-1, &overflow), std::numeric_limits<int64_t>::min());
 	EXPECT_EQ (overflow, true);
 	overflow = false;
 
-	EXPECT_EQ (subWithOverflowCheck (std::numeric_limits<int64_t>::min(), 1L, &overflow), std::numeric_limits<int64_t>::max());
+	EXPECT_EQ (subWithOverflowCheck (std::numeric_limits<int64_t>::min(), (int64_t)1, &overflow), std::numeric_limits<int64_t>::max());
 	EXPECT_EQ (overflow, true);
 	overflow = false;
 
@@ -75,11 +75,11 @@ TEST (MathFunctions, overflows){
 
 	// Multiplication
 	overflow = false;
-	EXPECT_EQ (multWithOverflowCheck(std::numeric_limits<int64_t>::max(), 2L, &overflow), -2); // on 2 complement
+	EXPECT_EQ (multWithOverflowCheck(std::numeric_limits<int64_t>::max(), (int64_t)2, &overflow), -2); // on 2 complement
 	EXPECT_EQ (overflow, true);
 
 	overflow = false;
-	EXPECT_EQ (multWithOverflowCheck(std::numeric_limits<int64_t>::min(), 2L, &overflow), 0); // on 2 complement
+	EXPECT_EQ (multWithOverflowCheck(std::numeric_limits<int64_t>::min(), (int64_t)2, &overflow), 0); // on 2 complement
 	EXPECT_EQ (overflow, true);
 
 	overflow = false;
@@ -101,11 +101,11 @@ TEST (MathFunctions, testLcm){
 	EXPECT_EQ (lcmWithOverflowCheck(-2,-3,&overflow), 6);
 	EXPECT_EQ (overflow, false);
 
-	EXPECT_EQ (lcmWithOverflowCheck(std::numeric_limits<int64_t>::max(),2L,&overflow), -2);
+	EXPECT_EQ (lcmWithOverflowCheck(std::numeric_limits<int64_t>::max(),(int64_t)2,&overflow), -2);
 	EXPECT_EQ (overflow, true);
 
 	overflow = false;
-	EXPECT_EQ (lcmWithOverflowCheck(std::numeric_limits<int64_t>::min(),2L,&overflow), std::numeric_limits<int64_t>::min());
+	EXPECT_EQ (lcmWithOverflowCheck(std::numeric_limits<int64_t>::min(),(int64_t)2,&overflow), std::numeric_limits<int64_t>::min());
 	EXPECT_EQ (overflow, false);
 
 	overflow = false;

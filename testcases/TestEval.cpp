@@ -91,12 +91,12 @@ TEST_F (TestEval, accurateEval) {
 	EXPECT_EQ (PrimitiveValue (Fraction64(1,3)), eval ("1/2 * 2/3"));
 
 
-	EXPECT_EQ (PrimitiveValue (1L), eval ("1^0"));
-	EXPECT_EQ (PrimitiveValue (1L), eval ("1^1"));
-	EXPECT_EQ (PrimitiveValue (1L), eval ("1^2"));
+	EXPECT_EQ (PrimitiveValue ((int64_t)1), eval ("1^0"));
+	EXPECT_EQ (PrimitiveValue ((int64_t)1), eval ("1^1"));
+	EXPECT_EQ (PrimitiveValue ((int64_t)1), eval ("1^2"));
 
-	EXPECT_EQ (PrimitiveValue (4L), eval ("2^2"));
-	EXPECT_EQ (PrimitiveValue (8L), eval ("2^3"));
+	EXPECT_EQ (PrimitiveValue ((int64_t)4), eval ("2^2"));
+	EXPECT_EQ (PrimitiveValue ((int64_t)8), eval ("2^3"));
 
 	EXPECT_EQ (PrimitiveValue (Fraction64(1,2)), eval ("2^-1"));
 	EXPECT_EQ (PrimitiveValue (Fraction64(1,4)), eval ("2^-2"));
