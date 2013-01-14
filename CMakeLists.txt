@@ -14,7 +14,7 @@ endif()
 
 if (NOT DEFINED WIN32)
 	# Warnings
-	set(CMAKE_CXX_FLAGS "-Wall")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
 if (DEFINED BOOST_ROOT)
@@ -25,6 +25,13 @@ else()
 	find_package (Boost 1.40.0 REQUIRED)
 	include_directories (${Boost_INCLUDE_DIRS})
 	message (STATUS "Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
+endif()
+
+if (ANDROID)
+    message (STATUS "Hello Android")
+    message (STATUS "ANDROID_NATIVE_API_LEVEL: ${ANDROID_NATIVE_API_LEVEL}")
+    # Fix Boost for Android
+    add_definitions ("-DBOOST_DETAIL_ENDIAN_HPP -DBOOST_LITTLE_ENDIAN -DBOOST_BYTE_ORDER=1234")
 endif()
 
 message (STATUS "CXX Flags:      ${CMAKE_CXX_FLAGS}")
