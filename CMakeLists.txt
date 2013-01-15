@@ -34,6 +34,10 @@ if (ANDROID)
     add_definitions ("-DBOOST_DETAIL_ENDIAN_HPP -DBOOST_LITTLE_ENDIAN -DBOOST_BYTE_ORDER=1234")
 endif()
 
+if (IOS)
+    message (STATUS "Hello iOS")
+endif()
+
 message (STATUS "CXX Flags:      ${CMAKE_CXX_FLAGS}")
 message (STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}") 
 
@@ -45,7 +49,9 @@ set (LIBS ${LIBS} "smallcalc")
 include_directories ("libsmallcalc")
 
 # Executeable
-add_subdirectory (testapp)
+if (NOT IOS)
+    add_subdirectory (testapp)
+endif()
 
 # Testcases
 find_package (GTest)
