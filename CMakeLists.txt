@@ -36,10 +36,14 @@ endif()
 
 if (IOS)
     message (STATUS "Hello iOS")
+    set (CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} "-g")
+    set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-Os -DNDEBUG")
 endif()
 
-message (STATUS "CXX Flags:      ${CMAKE_CXX_FLAGS}")
-message (STATUS "Install Prefix: ${CMAKE_INSTALL_PREFIX}") 
+message (STATUS "CXX Flags:        ${CMAKE_CXX_FLAGS}")
+message (STATUS "CXX Release Flags ${CMAKE_CXX_FLAGS_RELEASE}")
+message (STATUS "CXX Debug Flags   ${CMAKE_CXX_FLAGS_DEBUG}")
+message (STATUS "Install Prefix:   ${CMAKE_INSTALL_PREFIX}") 
 
 set (LIBS "")
 
