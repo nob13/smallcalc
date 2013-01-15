@@ -30,14 +30,16 @@ endif()
 if (ANDROID)
     message (STATUS "Hello Android")
     message (STATUS "ANDROID_NATIVE_API_LEVEL: ${ANDROID_NATIVE_API_LEVEL}")
+    # Debugging Symbols    
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
     # Fix Boost for Android
     add_definitions ("-DBOOST_DETAIL_ENDIAN_HPP -DBOOST_LITTLE_ENDIAN -DBOOST_BYTE_ORDER=1234")
 endif()
 
 if (IOS)
     message (STATUS "Hello iOS")
-    set (CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} "-g")
-    set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-Os -DNDEBUG")
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os -DNDEBUG")
 endif()
 
 message (STATUS "CXX Flags:        ${CMAKE_CXX_FLAGS}")
