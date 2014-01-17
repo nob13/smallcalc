@@ -1,5 +1,11 @@
 #!/bin/bash
 set -e # fail on first error
+if [ -z $ANDROID_NDK ]
+then
+	echo "\$ANDORID_NDK not set"
+	exit 1
+fi
+
 DIRNAME=`dirname $0`
 BOOST_ROOT=/usr/local/boost
 cd $DIRNAME
