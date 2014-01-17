@@ -7,14 +7,17 @@ if (NOT CMAKE_BUILD_TYPE)
 	set (CMAKE_BUILD_TYPE "DEBUG")
 endif()
 
+# Platform Specific
 if (WIN32)
 	add_definitions("-DWIN32")
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS") # otherwise windows doesn't like fopen etc.
-endif()
-
-if (NOT WIN32)
+else()
 	# Warnings
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    SET(LINUX TRUE)
 endif()
 
 if (DEFINED BOOST_ROOT)
@@ -78,4 +81,17 @@ if (NOT IOS AND NOT ANDROID)
 	add_subdirectory(testcases)
 endif()
 
+# Packaging
+if (LINUX)
+	# Note variables have to be set before include(CPack)!
+	SET(CPACK_CMAKE_GENERATOR "Unix Makefiles")
+	SET(CPACK_SOURCE_GENERATOR "TGZ")
+	SET(CPACK_GENERATOR "TGZ")
+	SET(CPACK_PACKAGE_NAME "libsmallcalc")
+	SET(CPACK_PACKAGE_VERSION "1.0.0")
+	SET(CPACK_PACKAGE_VERSION_MAJOR "1")
+	SET(CPACK_PACKAGE_VERSION_MINOR "0")
+	SET(CPACK_PACKAGE_VERSION_PATCH "0")
+	include(CPack)
+endif()
 
