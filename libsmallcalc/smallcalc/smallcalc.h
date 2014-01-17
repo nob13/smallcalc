@@ -4,7 +4,7 @@
 
 namespace sc {
 
-class ParserContext;
+struct ParserContext;
 
 /// Smallcalc  including context
 /// Note: this is stateful and NOT threadsafe

@@ -10,7 +10,7 @@
 
 namespace sc {
 
-class EvaluationContext;
+struct EvaluationContext;
 
 // Fundamentals
 PrimitiveValue add (const std::vector<PrimitiveValue> & arguments, const EvaluationContext* context);
