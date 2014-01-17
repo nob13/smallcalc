@@ -12,14 +12,14 @@ if (WIN32)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS") # otherwise windows doesn't like fopen etc.
 endif()
 
-if (NOT DEFINED WIN32)
+if (NOT WIN32)
 	# Warnings
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
 if (DEFINED BOOST_ROOT)
 	# find_package doesn't work on my mac building iOS builds
-	message(STATUS "BOOST_ROOT defined, taking it")
+	message(STATUS "BOOST_ROOT defined, taking it, ${BOOST_ROOT}/include")
 	include_directories (${BOOST_ROOT}/include)
 else()
 	find_package (Boost 1.40.0 REQUIRED)
@@ -60,20 +60,22 @@ if (NOT IOS)
 endif()
 
 # Testcases
-find_package (GTest)
-if (GTEST_FOUND)
-	if (NOT WIN32)
-		# gtest on fedora is broken
-		set (GTEST_LIBRARIES ${GTEST_LIBRARIES} pthread)
+if (NOT IOS AND NOT ANDROID)
+	find_package (GTest)
+	if (GTEST_FOUND)
+		if (NOT WIN32)
+			# gtest on fedora is broken
+			set (GTEST_LIBRARIES ${GTEST_LIBRARIES} pthread)
+		endif()
+	else()
+		message (STATUS "GTest not found, using shipped variant")
+		set(GTEST_DIRECTORY "dependencies_source/gtest-1.7.0")
+		add_subdirectory(${GTEST_DIRECTORY})
+		include_directories(${GTEST_DIRECTORY}/include)
+		set (GTEST_LIBRARIES gtest)
+		set (GTEST_MAIN_LIBRARIES gtest_main)
 	endif()
-else()
-	message (STATUS "GTest not found, using shipped variant")
-	set(GTEST_DIRECTORY "dependencies_source/gtest-1.7.0")
-	add_subdirectory(${GTEST_DIRECTORY})
-	include_directories(${GTEST_DIRECTORY}/include)
-	set (GTEST_LIBRARIES gtest)
-	set (GTEST_MAIN_LIBRARIES gtest_main)
+	add_subdirectory(testcases)
 endif()
 
-add_subdirectory(testcases)
 
