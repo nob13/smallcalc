@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 set -e # fail on first error
 DIRNAME=`dirname $0`
 cd $DIRNAME
