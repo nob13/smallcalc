@@ -66,8 +66,14 @@ if (GTEST_FOUND)
 		# gtest on fedora is broken
 		set (GTEST_LIBRARIES ${GTEST_LIBRARIES} pthread)
 	endif()
-	add_subdirectory ("testcases")
 else()
-	message (STATUS "GTest not found, no testcases")
+	message (STATUS "GTest not found, using shipped variant")
+	set(GTEST_DIRECTORY "dependencies_source/gtest-1.7.0")
+	add_subdirectory(${GTEST_DIRECTORY})
+	include_directories(${GTEST_DIRECTORY}/include)
+	set (GTEST_LIBRARIES gtest)
+	set (GTEST_MAIN_LIBRARIES gtest_main)
 endif()
+
+add_subdirectory(testcases)
 
