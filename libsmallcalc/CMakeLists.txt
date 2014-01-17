@@ -10,8 +10,7 @@ endif()
 
 add_library (smallcalc ${LIBRARY_TYPE} ${src_files} ${header_files})
 
-message (STATUS "Header files ${header_files}")
-
+# Install Header Files
 install (DIRECTORY smallcalc DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "smallcalc/impl*" EXCLUDE)
 
 install (TARGETS  smallcalc ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
