@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e # fail on first error
 DIRNAME=`dirname $0`
-BOOST_ROOT=/usr
+BOOST_ROOT=/usr/local/boost
 cd $DIRNAME
 mkdir -p build
 cd build
